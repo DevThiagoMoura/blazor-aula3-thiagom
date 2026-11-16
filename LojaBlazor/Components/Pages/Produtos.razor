@@ -1,0 +1,33 @@
+@page "/produtos"
+@rendermode InteractiveServer
+
+<PageTitle>Produtos</PageTitle>
+
+<h1>Produtos</h1>
+
+<Cartao Titulo="Novo produto">
+    <FormProduto AoCadastrar="Cadastrar" />
+</Cartao>
+
+@if (produtos.Count == 0)
+{
+    <div class="alert alert-info">Nenhum produto cadastrado.</div>
+}
+else
+{
+    <TabelaProdutos Produtos="produtos" />
+}
+
+@code {
+    // A página é a dona da lista: os componentes só desenham ou avisam.
+    private readonly List<Produto> produtos = new();
+    private int proximoId = 1;
+
+    // Chamado pelo FormProduto (via EventCallback) quando o cadastro é válido.
+    private void Cadastrar(Produto produto)
+    {
+        produto.Id = proximoId++;
+        produto.Nome = produto.Nome.Trim();
+        produtos.Add(produto);
+    }
+}

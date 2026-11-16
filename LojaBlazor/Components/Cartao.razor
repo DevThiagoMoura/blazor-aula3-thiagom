@@ -1,0 +1,20 @@
+@* Moldura reutilizável (card do Bootstrap).
+   O título vem por parâmetro e o recheio por ChildContent:
+   tudo o que a página escrever entre <Cartao> e </Cartao> aparece dentro do card-body. *@
+
+<div class="card mb-4">
+    <div class="card-body">
+        <h5 class="card-title">@Titulo</h5>
+
+        @ChildContent
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public string Titulo { get; set; } = string.Empty;
+
+    // O nome "ChildContent" é especial: o Blazor coloca aqui o conteúdo entre as tags.
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+}

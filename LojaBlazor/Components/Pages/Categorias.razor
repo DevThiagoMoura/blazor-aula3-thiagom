@@ -1,0 +1,76 @@
+@page "/categorias"
+@rendermode InteractiveServer
+
+@* O arquivo se chama Categorias.razor (plural) de propósito: o nome do arquivo vira o
+   nome da classe do componente. Se ele se chamasse Categoria.razor, a classe do
+   componente "Categoria" esconderia o modelo LojaBlazor.Models.Categoria e
+   "new Categoria { Nome = ... }" daria CS0117 (o componente não tem Nome/Quantidade). *@
+
+<PageTitle>Categorias</PageTitle>
+
+<h1>Categorias</h1>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <h5 class="card-title">Nova categoria</h5>
+
+        <EditForm Model="novaCategoria" OnValidSubmit="Cadastrar">
+            <DataAnnotationsValidator />
+
+            <div class="mb-3">
+                <label for="nome" class="form-label">Nome</label>
+                <InputText id="nome" class="form-control" @bind-Value="novaCategoria.Nome" />
+                <ValidationMessage For="() => novaCategoria.Nome" />
+            </div>
+
+            <div class="mb-3">
+                <label for="quantidade" class="form-label">Quantidade</label>
+                <InputNumber id="quantidade" class="form-control" @bind-Value="novaCategoria.Quantidade"
+                             ParsingErrorMessage="A quantidade deve ser um número inteiro." />
+                <ValidationMessage For="() => novaCategoria.Quantidade" />
+            </div>
+
+            <button type="submit" class="btn btn-primary">Cadastrar</button>
+        </EditForm>
+    </div>
+</div>
+
+@if (categorias.Count == 0)
+{
+    <div class="alert alert-info">Nenhuma categoria cadastrada.</div>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Nome</th>
+                <th>Quantidade</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var categoria in categorias)
+            {
+                <tr>
+                    <td>@categoria.Id</td>
+                    <td>@categoria.Nome</td>
+                    <td>@categoria.Quantidade</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private readonly List<Categoria> categorias = new();
+    private Categoria novaCategoria = new();
+    private int proximoId = 1;
+
+    private void Cadastrar()
+    {
+        novaCategoria.Id = proximoId++;
+        categorias.Add(novaCategoria);
+        novaCategoria = new Categoria();
+    }
+}

@@ -1,0 +1,38 @@
+@* Formulário com validação. Ele NÃO guarda o produto em lista nenhuma:
+   quando o cadastro é válido, avisa a página pelo EventCallback e se limpa. *@
+
+<EditForm Model="novoProduto" OnValidSubmit="Enviar">
+    <DataAnnotationsValidator />
+
+    <div class="mb-3">
+        <label for="nome" class="form-label">Nome</label>
+        <InputText id="nome" class="form-control" @bind-Value="novoProduto.Nome" />
+        <ValidationMessage For="() => novoProduto.Nome" />
+    </div>
+
+    <div class="mb-3">
+        <label for="preco" class="form-label">Preço (R$)</label>
+        <InputNumber id="preco" class="form-control" step="0.01" @bind-Value="novoProduto.Preco"
+                     ParsingErrorMessage="O preço deve ser um número válido." />
+        <ValidationMessage For="() => novoProduto.Preco" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Cadastrar</button>
+</EditForm>
+
+@code {
+    // Aviso do filho para o pai: a página decide o que fazer com o produto.
+    [Parameter]
+    public EventCallback<Produto> AoCadastrar { get; set; }
+
+    private Produto novoProduto = new();
+
+    // Só é chamado quando TODAS as regras do modelo passaram.
+    private async Task Enviar()
+    {
+        await AoCadastrar.InvokeAsync(novoProduto);
+
+        // Novo objeto => o formulário volta vazio e sem mensagens de erro.
+        novoProduto = new Produto();
+    }
+}

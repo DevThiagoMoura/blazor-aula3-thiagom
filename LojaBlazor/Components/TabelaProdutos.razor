@@ -1,0 +1,31 @@
+@using System.Globalization
+
+@* Só desenha a lista que recebe por parâmetro: não sabe de onde ela vem
+   nem como os produtos são cadastrados. *@
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Nome</th>
+            <th>Preço</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var produto in Produtos)
+        {
+            <tr>
+                <td>@produto.Id</td>
+                <td>@produto.Nome</td>
+                <td>@produto.Preco.ToString("C", PtBr)</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    private static readonly CultureInfo PtBr = new("pt-BR");
+
+    [Parameter, EditorRequired]
+    public IReadOnlyList<Produto> Produtos { get; set; } = [];
+}
