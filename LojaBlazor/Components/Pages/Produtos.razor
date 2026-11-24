@@ -1,5 +1,8 @@
 @page "/produtos"
 @rendermode InteractiveServer
+@using LojaBlazor.Data
+@using Microsoft.EntityFrameworkCore
+@inject IDbContextFactory<LojaContext> DbFactory
 
 <PageTitle>Produtos</PageTitle>
 
@@ -9,25 +12,56 @@
     <FormProduto AoCadastrar="Cadastrar" />
 </Cartao>
 
-@if (produtos.Count == 0)
+@if (produtos is null)
+{
+    <p><em>Carregando...</em></p>
+}
+else if (produtos.Count == 0)
 {
     <div class="alert alert-info">Nenhum produto cadastrado.</div>
 }
 else
 {
-    <TabelaProdutos Produtos="produtos" />
+    <TabelaProdutos Produtos="produtos" AoExcluir="Excluir" />
 }
 
 @code {
-    // A página é a dona da lista: os componentes só desenham ou avisam.
-    private readonly List<Produto> produtos = new();
-    private int proximoId = 1;
+    // A página é a dona da lista e a única que fala com o banco:
+    // os componentes só desenham ou avisam.
+    private List<Produto>? produtos;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await using var db = await DbFactory.CreateDbContextAsync();
+        produtos = await db.Produtos
+            .AsNoTracking()
+            .OrderBy(p => p.Id)
+            .ToListAsync();
+    }
 
     // Chamado pelo FormProduto (via EventCallback) quando o cadastro é válido.
-    private void Cadastrar(Produto produto)
+    private async Task Cadastrar(Produto produto)
     {
-        produto.Id = proximoId++;
         produto.Nome = produto.Nome.Trim();
-        produtos.Add(produto);
+
+        await using var db = await DbFactory.CreateDbContextAsync();
+        db.Produtos.Add(produto);
+        await db.SaveChangesAsync(); // INSERT; o MySQL devolve o Id (auto_increment)
+
+        produtos?.Add(produto);
+    }
+
+    // Chamado pela TabelaProdutos (via EventCallback) quando clicam em Excluir.
+    private async Task Excluir(Produto produto)
+    {
+        await using var db = await DbFactory.CreateDbContextAsync();
+        var existente = await db.Produtos.FindAsync(produto.Id);
+        if (existente is not null)
+        {
+            db.Produtos.Remove(existente);
+            await db.SaveChangesAsync(); // DELETE
+        }
+
+        produtos?.Remove(produto);
     }
 }

@@ -1,10 +1,21 @@
 using LojaBlazor.Components;
+using LojaBlazor.Data;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+
+// A string de conexão vem do appsettings.json (ConnectionStrings:Loja).
+var connectionString = builder.Configuration.GetConnectionString("Loja")
+    ?? throw new InvalidOperationException("String de conexão 'Loja' não encontrada no appsettings.json.");
+
+// Fábrica de contextos: em Blazor Server cada operação cria um DbContext
+// curto (using), em vez de um contexto único vivo durante todo o circuito.
+builder.Services.AddDbContextFactory<LojaContext>(options =>
+    options.UseMySQL(connectionString));
 
 var app = builder.Build();
 

@@ -1,23 +1,31 @@
 @using System.Globalization
 
 @* Só desenha a lista que recebe por parâmetro: não sabe de onde ela vem
-   nem como os produtos são cadastrados. *@
+   nem como os produtos são cadastrados ou apagados. O botão Excluir apenas
+   avisa a página (EventCallback) qual produto foi escolhido. *@
 
-<table class="table table-striped">
+<table class="table table-striped align-middle">
     <thead>
         <tr>
             <th>#</th>
             <th>Nome</th>
             <th>Preço</th>
+            <th></th>
         </tr>
     </thead>
     <tbody>
         @foreach (var produto in Produtos)
         {
-            <tr>
+            <tr @key="produto.Id">
                 <td>@produto.Id</td>
                 <td>@produto.Nome</td>
                 <td>@produto.Preco.ToString("C", PtBr)</td>
+                <td class="text-end">
+                    <button type="button" class="btn btn-sm btn-outline-danger"
+                            @onclick="() => AoExcluir.InvokeAsync(produto)">
+                        Excluir
+                    </button>
+                </td>
             </tr>
         }
     </tbody>
@@ -28,4 +36,9 @@
 
     [Parameter, EditorRequired]
     public IReadOnlyList<Produto> Produtos { get; set; } = [];
+
+    // Aviso do filho para o pai: "o usuário quer excluir este produto".
+    // Quem apaga no banco é a página.
+    [Parameter]
+    public EventCallback<Produto> AoExcluir { get; set; }
 }
